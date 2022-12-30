@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <style>
+        .content {
+            margin-top: 50px;
+        }
+
+        .paginator {
+            margin-top: 1em;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    
+
+    <div class="container">
+        <ul class="content list-group">
+        </ul>
+        <div class="paginator"></div>
+        <br/>
+        <p>Note: Data being paginated comes from db. It's not a temp array. Reused existing pagination code which I could understand to certain extent. Of course, there are still issues, as you'll realize.</p>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+        // Get total number of pages
+        const data = []; 
+        fetch('http://localhost:3000/users')
+            .then((res) => {
+                return res.json()
+            })
+            .then((data) => {
+                //console.log(data)
+                data = data; 
+                console.log(data.users)
+                console.log(data.users.length)
+                const listArray = []
+                for (let i = 0; i < data.users.length; i++) {
+                    listArray.push(`<li class="list-group-item">${data.users[i].name}&nbsp;${data.users[i].age}</li>`)
+                }
+                // console.log(listArray)
+                
+                // State
+                // Number of products
+                const numberOfItems = listArray.length
+                const numberPerPage = 10
+                const currentPage = 1
+
+                // Number of pages
+                const numberOfPages = Math.ceil(numberOfItems / numberPerPage)
+                console.log(numberOfPages)
+
+                function accomodatePage(clickedPage) {
+                    
+                    if (clickedPage <= 1) { return clickedPage + 1 }
+                    if (clickedPage >= numberOfPages) { return clickedPage - 1 }
+                    
+                    return clickedPage
+                }
+
+                function buildPagination(clickedPage) {
+                    $('.paginator').empty()
+                    const currPageNum = accomodatePage(clickedPage)
+                    if (numberOfPages >= 3) {
+                        for (let i = -1; i < 3; i++) {
+                            $('.paginator').append(`<button class="btn btn-primary" value="${currPageNum + i}">${currPageNum + i}</button>`)
+                        }
+                    } else {
+                        for (let i = 0; i < numberOfPages; i++) {
+                            $('.paginator').append(`<button class="btn btn-primary" value="${i + 1}">${i + 1}</button>`)
+                        }
+                    }
+                }
+
+                function buildPage(currPage) {
+                    const trimStart = (currPage - 1) * numberPerPage
+                    const trimEnd = trimStart + numberPerPage
+                    console.log(trimStart, trimEnd)
+                    console.log(listArray.slice(trimStart, trimEnd))
+                    $('.content').empty().append(listArray.slice(trimStart, trimEnd))
+                    // $('.grid-uniform').empty().append(listArray.slice(trimStart, trimEnd));
+                }
+
+                $(document).ready(function () {
+                    buildPage(1)
+                    buildPagination(currentPage)
+
+                    $('.paginator').on('click', 'button', function () {
+                        var clickedPage = parseInt($(this).val())
+                        buildPagination(clickedPage)
+                        console.log(`Page clicked on ${clickedPage}`)
+                        buildPage(clickedPage)
+                    });
+                });
+            })
+
+
+        
+    </script>
+</body>
+</html>
